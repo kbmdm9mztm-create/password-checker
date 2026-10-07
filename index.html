@@ -2,39 +2,63 @@
 <html>
 <head>
   <title>Password Checker</title>
+  <style>
+    body { font-family: Arial, sans-serif; max-width: 400px; margin: 60px auto; }
+    input { width: 70%; padding: 8px; font-size: 16px; }
+    button { padding: 8px; font-size: 16px; }
+    #bar-bg { background: #ddd; height: 10px; border-radius: 5px; margin-top: 15px; }
+    #bar { height: 10px; width: 0%; border-radius: 5px; transition: width 0.3s; }
+  </style>
 </head>
 <body>
   <h1>Password Checker</h1>
-  <input type="text" id="pw" placeholder="Type a password">
+  <input type="password" id="pw" placeholder="Type a password">
+  <button id="toggle">Show</button>
+  <div id="bar-bg"><div id="bar"></div></div>
   <p id="result">Start typing...</p>
-    <script>
-  const box = document.getElementById("pw");
-  const result = document.getElementById("result");
 
-  box.addEventListener("input", function () {
-    const pw = box.value;
+  <script>
+    const box = document.getElementById("pw");
+    const result = document.getElementById("result");
+    const bar = document.getElementById("bar");
+    const toggle = document.getElementById("toggle");
 
-    if (pw.length === 0) {
-      result.textContent = "Start typing...";
-      return;
-    }
+    toggle.addEventListener("click", function () {
+      if (box.type === "password") {
+        box.type = "text";
+        toggle.textContent = "Hide";
+      } else {
+        box.type = "password";
+        toggle.textContent = "Show";
+      }
+    });
 
-    let score = 0;
-    if (pw.length >= 8) score++;
-    if (pw.length >= 12) score++;
-    if (/[a-z]/.test(pw)) score++;
-    if (/[A-Z]/.test(pw)) score++;
-    if (/[0-9]/.test(pw)) score++;
-    if (/[^a-zA-Z0-9]/.test(pw)) score++;
+    box.addEventListener("input", function () {
+      const pw = box.value;
 
-    let rating;
-    if (score <= 2) rating = "Weak";
-    else if (score <= 4) rating = "Okay";
-    else rating = "Strong";
+      if (pw.length === 0) {
+        result.textContent = "Start typing...";
+        bar.style.width = "0%";
+        return;
+      }
 
-    result.textContent = rating + " (score " + score + " out of 6)";
-  });
-</script>
- 
+      let score = 0;
+      if (pw.length >= 8) score++;
+      if (pw.length >= 12) score++;
+      if (/[a-z]/.test(pw)) score++;
+      if (/[A-Z]/.test(pw)) score++;
+      if (/[0-9]/.test(pw)) score++;
+      if (/[^a-zA-Z0-9]/.test(pw)) score++;
+
+      let rating, color;
+      if (score <= 2) { rating = "Weak"; color = "red"; }
+      else if (score <= 4) { rating = "Okay"; color = "orange"; }
+      else { rating = "Strong"; color = "green"; }
+
+      bar.style.width = (score / 6 * 100) + "%";
+      bar.style.background = color;
+      result.textContent = rating + " (score " + score + " out of 6)";
+    });
+  </script>
 </body>
 </html>
