@@ -16,12 +16,15 @@
   <button id="toggle">Show</button>
   <div id="bar-bg"><div id="bar"></div></div>
   <p id="result">Start typing...</p>
+  <p id="breach"></p>
 
   <script>
     const box = document.getElementById("pw");
     const result = document.getElementById("result");
     const bar = document.getElementById("bar");
     const toggle = document.getElementById("toggle");
+    const breach = document.getElementById("breach");
+    let timer;
 
     toggle.addEventListener("click", function () {
       if (box.type === "password") {
@@ -33,12 +36,58 @@
       }
     });
 
+    // Turns text into a fingerprint (SHA-1 hash)
+    async function sha1(text) {
+      const data = new TextEncoder().encode(text);
+      const hashBuffer = await crypto.subtle.digest("SHA-1", data);
+      const bytes = Array.from(new Uint8Array(hashBuffer));
+      return bytes.map(b => b.toString(16).padStart(2, "0")).join("").toUpperCase();
+    }
+
+    // Asks Have I Been Pwned if this password was leaked
+    async function checkBreach(pw) {
+      breach.style.color = "black";
+      breach.textContent = "Checking data breaches...";
+      try {
+        const hash = await sha1(pw);
+        const prefix = hash.slice(0, 5);
+        const suffix = hash.slice(5);
+
+        const response = await fetch("https://api.pwnedpasswords.com/range/" + prefix);
+        const text = await response.text();
+
+        let count = 0;
+        for (const line of text.split("\n")) {
+          const parts = line.trim().split(":");
+          if (parts[0] === suffix) {
+            count = parseInt(parts[1]);
+            break;
+          }
+        }
+
+        if (box.value !== pw) return; // user kept typing, ignore old result
+
+        if (count > 0) {
+          breach.style.color = "red";
+          breach.textContent = "Leaked " + count.toLocaleString() + " times in data breaches. Do not use it!";
+        } else {
+          breach.style.color = "green";
+          breach.textContent = "Not found in known data breaches.";
+        }
+      } catch (error) {
+        breach.style.color = "gray";
+        breach.textContent = "Could not check breaches (are you online?)";
+      }
+    }
+
     box.addEventListener("input", function () {
       const pw = box.value;
+      clearTimeout(timer);
 
       if (pw.length === 0) {
         result.textContent = "Start typing...";
         bar.style.width = "0%";
+        breach.textContent = "";
         return;
       }
 
@@ -58,6 +107,9 @@
       bar.style.width = (score / 6 * 100) + "%";
       bar.style.background = color;
       result.textContent = rating + " (score " + score + " out of 6)";
+
+      // Wait half a second after typing stops, then check breaches
+      timer = setTimeout(function () { checkBreach(pw); }, 500);
     });
   </script>
 </body>
