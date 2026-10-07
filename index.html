@@ -7,14 +7,34 @@
   <h1>Password Checker</h1>
   <input type="text" id="pw" placeholder="Type a password">
   <p id="result">Start typing...</p>
+    <script>
+  const box = document.getElementById("pw");
+  const result = document.getElementById("result");
 
-  <script>
-    const box = document.getElementById("pw");
-    const result = document.getElementById("result");
+  box.addEventListener("input", function () {
+    const pw = box.value;
 
-    box.addEventListener("input", function () {
-      result.textContent = "You typed " + box.value.length + " characters";
-    });
-  </script>
+    if (pw.length === 0) {
+      result.textContent = "Start typing...";
+      return;
+    }
+
+    let score = 0;
+    if (pw.length >= 8) score++;
+    if (pw.length >= 12) score++;
+    if (/[a-z]/.test(pw)) score++;
+    if (/[A-Z]/.test(pw)) score++;
+    if (/[0-9]/.test(pw)) score++;
+    if (/[^a-zA-Z0-9]/.test(pw)) score++;
+
+    let rating;
+    if (score <= 2) rating = "Weak";
+    else if (score <= 4) rating = "Okay";
+    else rating = "Strong";
+
+    result.textContent = rating + " (score " + score + " out of 6)";
+  });
+</script>
+ 
 </body>
 </html>
