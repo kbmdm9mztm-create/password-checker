@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Password Checker</title>
+</head>
+<body>
+  <h1>Password Checker</h1>
+  <input type="text" id="pw" placeholder="Type a password">
+  <p id="result">Start typing...</p>
+
+  <script>
+    const box = document.getElementById("pw");
+    const result = document.getElementById("result");
+
+    box.addEventListener("input", function () {
+      result.textContent = "You typed " + box.value.length + " characters";
+    });
+  </script>
+</body>
+</html>
