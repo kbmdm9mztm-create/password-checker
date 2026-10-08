@@ -17,6 +17,7 @@
   <button id="generate">Generate</button>
   <div id="bar-bg"><div id="bar"></div></div>
   <p id="result">Start typing...</p>
+  <p id="crack"></p>
   <p id="breach"></p>
   <ul id="tips"></ul>
 
@@ -72,6 +73,7 @@
         if (count > 0) {
           breach.style.color = "red";
           breach.textContent = "Leaked " + count.toLocaleString() + " times in data breaches. Do not use it!";
+          document.getElementById("crack").textContent = "Estimated time to crack: instantly (it is already leaked)";
         } else {
           breach.style.color = "green";
           breach.textContent = "Not found in known data breaches.";
@@ -95,11 +97,35 @@ generateBtn.addEventListener("click", function () {
   toggle.textContent = "Hide";
   box.dispatchEvent(new Event("input"));
 });
+    function crackTime(pw) {
+  let pool = 0;
+  if (/[a-z]/.test(pw)) pool += 26;
+  if (/[A-Z]/.test(pw)) pool += 26;
+  if (/[0-9]/.test(pw)) pool += 10;
+  if (/[^a-zA-Z0-9]/.test(pw)) pool += 32;
+
+  const guesses = Math.pow(pool, pw.length);
+  const seconds = guesses / 1e10; // 10 billion guesses per second
+
+  const minute = 60, hour = 3600, day = 86400, year = 31557600;
+
+  if (seconds < 1) return "instantly";
+  if (seconds < hour) return Math.round(seconds / minute) + " minutes";
+  if (seconds < day) return Math.round(seconds / hour) + " hours";
+  if (seconds < year) return Math.round(seconds / day) + " days";
+
+  const years = seconds / year;
+  if (years >= 1e9) return "billions of years";
+  if (years >= 1e6) return "millions of years";
+  if (years >= 1000) return "thousands of years";
+  return Math.round(years).toLocaleString() + " years";
+}
     box.addEventListener("input", function () {
       const pw = box.value;
       clearTimeout(timer);
 
       if (pw.length === 0) {
+        document.getElementById("crack").textContent = "";
         result.textContent = "Start typing...";
         document.getElementById("tips").innerHTML = "";
         bar.style.width = "0%";
@@ -133,6 +159,7 @@ for (const tip of tips) {
   li.textContent = tip;
   tipsList.appendChild(li);
 }
+    document.getElementById("crack").textContent = "Estimated time to crack: " + crackTime(pw);
       bar.style.width = (score / 6 * 100) + "%";
       bar.style.background = color;
       result.textContent = rating + " (score " + score + " out of 6)";
