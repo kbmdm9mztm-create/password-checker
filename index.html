@@ -18,6 +18,7 @@
   <div id="bar-bg"><div id="bar"></div></div>
   <p id="result">Start typing...</p>
   <p id="breach"></p>
+  <ul id="tips"></ul>
 
   <script>
     const box = document.getElementById("pw");
@@ -100,6 +101,7 @@ generateBtn.addEventListener("click", function () {
 
       if (pw.length === 0) {
         result.textContent = "Start typing...";
+        document.getElementById("tips").innerHTML = "";
         bar.style.width = "0%";
         breach.textContent = "";
         return;
@@ -117,7 +119,20 @@ generateBtn.addEventListener("click", function () {
       if (score <= 2) { rating = "Weak"; color = "red"; }
       else if (score <= 4) { rating = "Okay"; color = "orange"; }
       else { rating = "Strong"; color = "green"; }
+      const tips = [];
+if (pw.length < 12) tips.push("Make it at least 12 characters long");
+if (!/[a-z]/.test(pw)) tips.push("Add a lowercase letter");
+if (!/[A-Z]/.test(pw)) tips.push("Add a capital letter");
+if (!/[0-9]/.test(pw)) tips.push("Add a number");
+if (!/[^a-zA-Z0-9]/.test(pw)) tips.push("Add a symbol like ! or @");
 
+const tipsList = document.getElementById("tips");
+tipsList.innerHTML = "";
+for (const tip of tips) {
+  const li = document.createElement("li");
+  li.textContent = tip;
+  tipsList.appendChild(li);
+}
       bar.style.width = (score / 6 * 100) + "%";
       bar.style.background = color;
       result.textContent = rating + " (score " + score + " out of 6)";
